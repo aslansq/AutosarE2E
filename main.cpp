@@ -28,7 +28,7 @@ int main()
 	config.dataIdNibbleOffset = 12;
 	config.maxDeltaCounter = 3;
 
-	E2E::P11 p11(config);
+	E2E::P11 p11(E2E::P11Functionality::PROTECT, config);
 	std::vector<uint8_t> frame = { 0, 0, 0, 0, 0, 0, 0, 0};
 	std::vector<uint8_t> protectedFrame(8);
 

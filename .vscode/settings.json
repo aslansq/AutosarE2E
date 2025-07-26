@@ -47,6 +47,12 @@
 		"streambuf": "cpp",
 		"cinttypes": "cpp",
 		"typeinfo": "cpp",
-		"crc_tables.h": "c"
+		"crc_tables.h": "c",
+		"any": "cpp",
+		"set": "cpp",
+		"optional": "cpp",
+		"iomanip": "cpp",
+		"sstream": "cpp",
+		"variant": "cpp"
 	}
 }

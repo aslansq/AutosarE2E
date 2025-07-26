@@ -26,10 +26,14 @@ namespace E2E {
 	{
 	}
 
-	P11::P11(const P11Config& configRef) :
+	P11::P11(P11Functionality functionality, const P11Config& configRef) :
+		functionality(functionality),
 		config(configRef),
 		count(0)
 	{
+		if(functionality == P11Functionality::CHECK) {
+			count = countMaxVal;
+		}
 	}
 
 	uint8_t P11::getFrameCrc(const std::vector<uint8_t>& frameRef) const
@@ -59,9 +63,80 @@ namespace E2E {
 		return (frameRef[byteIdx] >> bitIdx) & 0x0F;
 	}
 
+	uint8_t P11::getReadDataIdNibble(const std::vector<uint8_t>& frameRef) const
+	{
+		uint8_t nibble = 0;
+
+		if(config.dataIdMode == P11DataIdModes::DATA_ID_NIBBLE) {
+			uint32_t byteIdx = config.dataIdNibbleOffset / 8;
+			uint32_t bitIdx = config.dataIdNibbleOffset % 8;
+
+			if (byteIdx >= frameRef.size()) {
+				throw std::runtime_error("Data ID nibble offset exceeds frame size.");
+			}
+
+			nibble = (frameRef[byteIdx] >> bitIdx) & 0x0F;
+		}
+
+		return nibble;
+	}
+
 	P11Status P11::check(const std::vector<uint8_t>& frameRef)
 	{
-		(void)frameRef; // Placeholder for actual implementation
+		if(functionality != P11Functionality::CHECK) {
+			throw std::runtime_error("Functionality must be CHECK for this method.");
+		}
+
+		uint8_t readNibble;
+		uint8_t nibble;
+		uint8_t readCount;
+		uint8_t readCrc;
+		uint8_t computedCRC;
+		uint16_t deltaCount;
+
+		if (!isInputVerified(frameRef.size())) {
+			return P11Status::WRONG_INPUT;
+		}
+
+		if(config.dataIdMode == P11DataIdModes::DATA_ID_NIBBLE) {
+			readNibble = getReadDataIdNibble(frameRef);
+			nibble = (config.dataId & 0x00f0) >> 4;
+		}
+
+		readCount = getFrameCount(frameRef);
+		readCrc = getFrameCrc(frameRef);
+		computedCRC = computeCRC(frameRef);
+
+		if(readCount >= count) {
+			deltaCount = readCount - count;
+		} else {
+			deltaCount = (readCount + countMaxVal - count + 1); // Wrap around case
+		}
+
+		if(computedCRC != readCrc) {
+			return P11Status::ERROR;
+		}
+
+		if((config.dataIdMode == P11DataIdModes::DATA_ID_NIBBLE) && (readNibble != nibble)) {
+			return P11Status::ERROR;
+		}
+
+		//if(!(deltaCount <= config.maxDeltaCounter && deltaCount > 0)) {
+		//	count = readCount;
+		//	return P11Status::WRONG_SEQ;
+		//}
+
+		if(deltaCount == 0) {
+			count = readCount;
+			return P11Status::REPEATED;
+		}
+
+		if(deltaCount != 1) {
+			count = readCount;
+			return P11Status::OK_SOME_LOST;
+		}
+
+		count = readCount;
 		return P11Status::OK; // Placeholder for actual implementation
 	}
 
@@ -69,6 +144,10 @@ namespace E2E {
 	{
 		uint8_t calculatedCRC;
 		uint32_t crcIdx;
+
+		if(functionality != P11Functionality::PROTECT) {
+			throw std::runtime_error("Functionality must be PROTECT for this method.");
+		}
 
 		if(!isInputVerified(frameRef.size())) {
 			throw std::runtime_error("Input frame length does not match expected length.");
@@ -95,6 +174,10 @@ namespace E2E {
 	{
 		if(config.dataLen != 64) {
 			throw std::runtime_error("Data length must be 64 bits for this method.");
+		}
+
+		if(functionality != P11Functionality::PROTECT) {
+			throw std::runtime_error("Functionality must be PROTECT for this method.");
 		}
 
 		std::vector<uint8_t> frameRef(8);
@@ -204,7 +287,7 @@ namespace E2E {
 	void P11::countIncrement()
 	{
 		count++;
-		if(count == 0x0F) {
+		if(count == (countMaxVal + 1)) {
 			count = 0;
 		}
 	}

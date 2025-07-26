@@ -11,7 +11,7 @@ TEST(E2ETest, P11Protect) {
 	config.dataIdNibbleOffset = 12;
 	config.maxDeltaCounter = 3;
 
-	E2E::P11 p11(config);
+	E2E::P11 p11(E2E::P11Functionality::PROTECT, config);
 	std::vector<uint8_t> frame = {
 		0, 0, 0, 0,
 		0, 0, 0, 0
@@ -30,4 +30,33 @@ TEST(E2ETest, P11Protect) {
 		0x0 , 0x0, 0x0, 0x0
 	};
 	EXPECT_EQ(expectedProtectedFrame, protectedFrame);
+}
+
+TEST(E2ETest, P11Check) {
+	E2E::P11Status status;
+	E2E::P11Config config;
+	config.dataId = 0x123;
+	config.dataLen = 64;
+	config.dataIdMode = E2E::P11DataIdModes::BOTH;
+	config.counterOffset = 8;
+	config.crcOffset = 0;
+	config.dataIdNibbleOffset = 12;
+	config.maxDeltaCounter = 3;
+
+	E2E::P11 p11(E2E::P11Functionality::CHECK, config);
+	std::vector<uint8_t> frame = {
+		0xcc, 0x0, 0x0, 0x0,
+		0x0 , 0x0, 0x0, 0x0
+	};
+
+	status = p11.check(frame);
+	EXPECT_EQ(E2E::P11Status::OK, status);
+
+	frame = {
+		0x91, 0x1, 0x0, 0x0,
+		0x0 , 0x0, 0x0, 0x0
+	};
+
+	status = p11.check(frame);
+	EXPECT_EQ(E2E::P11Status::OK, status);
 }

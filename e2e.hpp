@@ -18,6 +18,11 @@ namespace E2E {
 		OK
 	};
 
+	enum class P11Functionality {
+		PROTECT = 0,
+		CHECK = 1
+	};
+
 	class P11Config {
 	public:
 		P11Config();
@@ -34,20 +39,23 @@ namespace E2E {
 
 	class P11 {
 	public:
-		P11(const P11Config& configRef);
+		P11(P11Functionality functionality, const P11Config& configRef);
 		P11Status check(const std::vector<uint8_t>& frameRef);
 		void protect(const std::vector<uint8_t>& frameRef, std::vector<uint8_t>& frameOutRef);
 		uint64_t protect(uint64_t frame);
 	private:
 		uint8_t getFrameCrc(const std::vector<uint8_t>& frameRef) const;
 		uint8_t getFrameCount(const std::vector<uint8_t>& frameRef) const;
+		uint8_t getReadDataIdNibble(const std::vector<uint8_t>& frameRef) const;
 		uint8_t computeCRC(const std::vector<uint8_t>& frameOutRef) const;
 		void writeDataIdNibble(std::vector<uint8_t>& frameOutRef);
 		void writeCounter(std::vector<uint8_t>& frameOutRef);
 		bool isInputVerified(uint32_t frameLen) const;
 		void countIncrement();
+		P11Functionality functionality;
 		P11Config config;
 		uint8_t count;
+		const uint8_t countMaxVal = 0x0e;
 		Crc crc;
 	};
 }
