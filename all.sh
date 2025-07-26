@@ -6,4 +6,4 @@ make
 
 ctest
 
-./AutosarE2E
+./AutosarE2EDemo

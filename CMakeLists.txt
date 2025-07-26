@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(AutosarE2E LANGUAGES CXX)
+project(AutosarE2EDemo LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 # Print build type
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
-add_executable(AutosarE2E main.cpp crc.cpp e2e.cpp)
+add_executable(AutosarE2EDemo main.cpp crc.cpp e2e.cpp)
 
 # Enable testing and add test
 enable_testing()
