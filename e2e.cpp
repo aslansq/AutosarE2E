@@ -157,7 +157,10 @@ namespace E2E {
 	{
 		uint8_t calculatedCRC = 0;
 		uint32_t crcIdx = config.crcOffset / 8;
+		std::vector<uint8_t> toBeCalcVect;
 		std::vector<uint8_t> temp;
+		toBeCalcVect.clear();
+		temp.clear();
 
 		if (config.crcOffset % 8 != 0) {
 			throw std::runtime_error("CRC offset must be a multiple of 8.");
@@ -168,34 +171,24 @@ namespace E2E {
 		}
 
 		if (config.dataIdMode == P11DataIdModes::DATA_ID_NIBBLE) {
-			temp.clear();
-			temp.push_back((uint8_t)(config.dataId & 0x00ff));
-			calculatedCRC = crc.calc_j1850(temp, 0xff, false);
+			toBeCalcVect.push_back((uint8_t)(config.dataId & 0x00ff));
+			toBeCalcVect.push_back(0);
 
-			temp.clear();
-			temp.push_back(0);
-			calculatedCRC = crc.calc_j1850(temp, calculatedCRC, false);
-
-			temp.clear();
-			temp = frameOutRef;
-			temp.erase(temp.begin() + crcIdx);
-			calculatedCRC = crc.calc_j1850(temp, calculatedCRC, false);
 		} else if(config.dataIdMode == P11DataIdModes::BOTH) {
-			temp.clear();
-			temp.push_back((uint8_t)(config.dataId & 0x00ff));
-			calculatedCRC = crc.calc_j1850(temp, 0xff, false);
-
-			temp.clear();
-			temp.push_back((uint8_t)config.dataId >> 8);
-			calculatedCRC = crc.calc_j1850(temp, calculatedCRC, false);
-
-			temp.clear();
-			temp = frameOutRef;
-			temp.erase(temp.begin() + crcIdx);
-			calculatedCRC = crc.calc_j1850(temp, calculatedCRC, false);
-
-			calculatedCRC ^= 0xff;
+			toBeCalcVect.push_back((uint8_t)(config.dataId & 0x00ff));
+			toBeCalcVect.push_back((uint8_t)(config.dataId >> 8));
 		}
+
+		temp = frameOutRef;
+		temp.erase(temp.begin() + crcIdx);
+
+		for(const uint8_t& byte : temp) {
+			toBeCalcVect.push_back(byte);
+		}
+		
+		calculatedCRC = crc.calc_j1850(toBeCalcVect, 0xff, false);
+
+		calculatedCRC ^= 0xff;
 
 		return calculatedCRC;
 	}

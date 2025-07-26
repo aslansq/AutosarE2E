@@ -3,4 +3,7 @@ mkdir build
 cd build
 cmake ..
 make
+
+ctest
+
 ./AutosarE2E

@@ -18,3 +18,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 add_executable(AutosarE2E main.cpp crc.cpp e2e.cpp)
+
+# Enable testing and add test
+enable_testing()
+add_subdirectory(tests)
