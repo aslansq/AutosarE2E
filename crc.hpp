@@ -1,3 +1,5 @@
+#ifndef AUTOSAR_E2E_CRC_HPP
+#define AUTOSAR_E2E_CRC_HPP
 
 #include <cstdint>
 #include <vector>
@@ -11,3 +13,5 @@ public:
 private:
 	static const std::vector<uint8_t> j1850Table;
 };
+
+#endif // AUTOSAR_E2E_CRC_HPP

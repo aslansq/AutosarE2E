@@ -1,3 +1,6 @@
+#ifndef AUTOSAR_E2E_E2E_HPP
+#define AUTOSAR_E2E_E2E_HPP
+
 #include <cstdint>
 #include <vector>
 #include "crc.hpp"
@@ -59,3 +62,5 @@ namespace E2E {
 		Crc crc;
 	};
 }
+
+#endif // AUTOSAR_E2E_E2E_HPP
