@@ -26,10 +26,22 @@ namespace E2E {
 	{
 	}
 
-	P11::P11(P11Functionality functionality, const P11Config& configRef) :
+	P11::P11(
+			P11Functionality functionality,
+			const P11Config& configRef
+	) :
+		P11(functionality, 0, configRef)
+	{
+	}
+
+	P11::P11(
+			P11Functionality functionality,
+			uint8_t count,
+			const P11Config& configRef
+	) :
 		functionality(functionality),
 		config(configRef),
-		count(0)
+		count(count)
 	{
 		if(functionality == P11Functionality::CHECK) {
 			count = countMaxVal;

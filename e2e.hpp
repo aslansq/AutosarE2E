@@ -42,7 +42,15 @@ namespace E2E {
 
 	class P11 {
 	public:
-		P11(P11Functionality functionality, const P11Config& configRef);
+		P11(
+			P11Functionality functionality,
+			const P11Config& configRef
+		);
+		P11(
+			P11Functionality functionality,
+			uint8_t count,
+			const P11Config& configRef
+		);
 		P11Status check(const std::vector<uint8_t>& frameRef);
 		void protect(const std::vector<uint8_t>& frameRef, std::vector<uint8_t>& frameOutRef);
 		uint64_t protect(uint64_t frame);
