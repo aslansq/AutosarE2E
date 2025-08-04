@@ -26,22 +26,14 @@ namespace E2E {
 	{
 	}
 
-	P11::P11(
-			P11Functionality functionality,
-			const P11Config& configRef
-	) :
-		P11(functionality, 0, configRef)
-	{
-	}
 
 	P11::P11(
 			P11Functionality functionality,
-			uint8_t count,
 			const P11Config& configRef
 	) :
 		functionality(functionality),
 		config(configRef),
-		count(count)
+		count(0)
 	{
 		if(functionality == P11Functionality::CHECK) {
 			count = countMaxVal;
@@ -91,6 +83,20 @@ namespace E2E {
 		}
 
 		return nibble;
+	}
+
+	P11Status P11::check(uint64_t frame)
+	{
+		if(functionality != P11Functionality::CHECK) {
+			throw std::runtime_error("Functionality must be CHECK for this method.");
+		}
+
+		std::vector<uint8_t> frameRef(8);
+		for (int i = 0; i < 8; ++i) {
+			frameRef[i] = (frame >> (i * 8)) & 0xFF;
+		}
+
+		return check(frameRef);
 	}
 
 	P11Status P11::check(const std::vector<uint8_t>& frameRef)
@@ -150,6 +156,14 @@ namespace E2E {
 
 		count = readCount;
 		return P11Status::OK; // Placeholder for actual implementation
+	}
+
+	void P11::setCount(uint8_t count)
+	{
+		if(count > countMaxVal) {
+			throw std::runtime_error("Count exceeds maximum value.");
+		}
+		this->count = count;
 	}
 
 	void P11::protect(const std::vector<uint8_t>& frameRef, std::vector<uint8_t>& frameOutRef)

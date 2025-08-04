@@ -30,6 +30,31 @@ TEST(E2ETest, P11Protect) {
 		0x0 , 0x0, 0x0, 0x0
 	};
 	EXPECT_EQ(expectedProtectedFrame, protectedFrame);
+
+	p11.setCount(0);
+	p11.protect(frame, protectedFrame);
+	expectedProtectedFrame = {
+		0xcc, 0x0, 0x0, 0x0,
+		0x0 , 0x0, 0x0, 0x0
+	};
+	EXPECT_EQ(expectedProtectedFrame, protectedFrame);
+}
+
+TEST(E2ETest, P11ProtectU64) {
+	E2E::P11Config config;
+	config.dataId = 0x123;
+	config.dataLen = 64;
+	config.dataIdMode = E2E::P11DataIdModes::BOTH;
+	config.counterOffset = 8;
+	config.crcOffset = 0;
+	config.dataIdNibbleOffset = 12;
+	config.maxDeltaCounter = 3;
+
+	E2E::P11 p11(E2E::P11Functionality::PROTECT, config);
+	uint64_t frame = 0;
+	uint64_t protectedFrame = p11.protect(frame);
+	uint64_t expectedProtectedFrame = 0xcc;
+	EXPECT_EQ(expectedProtectedFrame, protectedFrame);
 }
 
 TEST(E2ETest, P11Check) {
@@ -56,6 +81,29 @@ TEST(E2ETest, P11Check) {
 		0x91, 0x1, 0x0, 0x0,
 		0x0 , 0x0, 0x0, 0x0
 	};
+
+	status = p11.check(frame);
+	EXPECT_EQ(E2E::P11Status::OK, status);
+}
+
+TEST(E2ETest, P11CheckU64) {
+	E2E::P11Status status;
+	E2E::P11Config config;
+	config.dataId = 0x123;
+	config.dataLen = 64;
+	config.dataIdMode = E2E::P11DataIdModes::BOTH;
+	config.counterOffset = 8;
+	config.crcOffset = 0;
+	config.dataIdNibbleOffset = 12;
+	config.maxDeltaCounter = 3;
+
+	E2E::P11 p11(E2E::P11Functionality::CHECK, config);
+	uint64_t frame = 0xcc;
+
+	status = p11.check(frame);
+	EXPECT_EQ(E2E::P11Status::OK, status);
+
+	frame = 0x0191;
 
 	status = p11.check(frame);
 	EXPECT_EQ(E2E::P11Status::OK, status);
